@@ -1,4 +1,5 @@
 const express = require('express')
+const jwt = require('jsonwebtoken')
 let Exercise = require('./../Models/Exercise')
 
 const router = express.Router()
@@ -42,21 +43,31 @@ router.route('/:id/update').put((req, res) => {
 
 router.route('/').post((req, res) => {
 
-    const username = req.body.username
-    const date = req.body.date
-    const description = req.body.description
-    const duration = Number(req.body.duration)
+    jwt.verify(req.token, 'secretkey', (err, authData ) => {
 
-    const newExercise = new Exercise({
-        username,
-        date,
-        description,
-        duration
+        if(err)
+        {
+            res.status(403).json({message: 'Foridden', err})
+        
+        }else{
+
+            const username = req.body.username
+            const date = req.body.date
+            const description = req.body.description
+            const duration = Number(req.body.duration)
+        
+            const newExercise = new Exercise({
+                username,
+                date,
+                description,
+                duration
+            })
+        
+            newExercise.save()
+            .then(() => res.status(200).json({message: `exercise saved`, authData}))
+            .catch(err => res.status(400).json({message: `Error: ${err}`}))
+        }
     })
-
-    newExercise.save()
-    .then(() => res.status(200).json({message: `exercise saved`}))
-    .catch(err => res.status(400).json({message: `Error: ${err}`}))
 })
 
 module.exports = router
