@@ -3,12 +3,15 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 dotenv.config({path: './config/.env'})
 const connection = require('./config/db')
+const path = require('path')
 
 const app = express()
 
 //initiate middleware
 app.use(cors())
+app.use('./public', express.static(path.join(__dirname, 'public')))
 app.use(express.json())
+
 
 const PORT  = process.env.PORT || 3000
 
@@ -19,6 +22,8 @@ app.use('/api/auth/login', require('./routes/auth'))
 app.use('/api/exercises', verifyToken, require('./routes/exercise'))
 
 app.use('/api/users', verifyToken, require('./routes/user'))
+
+app.use('/api/send/enquiry', require('./routes/mailer'))
 
 function verifyToken(req, res, next)
 {
